@@ -3,6 +3,7 @@ package com.example.instagramclone;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -26,6 +27,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     EditText passwordET;
     TextView signUpTextView;
     boolean signUpMode = false;
+
+    public void showUserList(){
+        Intent intent = new Intent(getApplicationContext(),UserListActivity.class);
+        startActivity(intent);
+    }
 
     @Override
     public void onClick(View v) {
@@ -62,6 +68,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         if (e == null) {
                             Log.i("Who Signed Up ",user.getUsername());
                             Toast.makeText(MainActivity.this, user.getUsername()+" Signed Up", Toast.LENGTH_SHORT).show();
+                            showUserList();
                         } else {
                             Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
 
@@ -74,6 +81,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     public void done(ParseUser user, ParseException e) {
                         if( user != null){
                             Toast.makeText(MainActivity.this, user.getUsername()+" Logged In", Toast.LENGTH_SHORT).show();
+                            showUserList();
                         } else {
                             Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
                         }
@@ -86,7 +94,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        getSupportActionBar().hide();
         usernameET = (EditText) findViewById(R.id.username);
         passwordET = (EditText) findViewById(R.id.password);
         ImageView logoImageView= (ImageView) findViewById(R.id.logoImageView);
@@ -108,6 +116,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                  return false;
              }
          });
+
+        if(ParseUser.getCurrentUser() != null){
+            showUserList();
+            Toast.makeText(MainActivity.this, ParseUser.getCurrentUser().getUsername()+" Logged In", Toast.LENGTH_SHORT).show();
+        }
 
         // Check if logged in ?
 
