@@ -3,7 +3,7 @@
     package="com.example.instagramclone">
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <application
         android:name=".StarterApplication"
@@ -14,7 +14,8 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.InstagramClone"
         android:usesCleartextTraffic="true">
-        <activity android:name=".UserListActivity"></activity>
+        <activity android:name=".UserFeedActivity"></activity>
+        <activity android:name=".UserListActivity" />
         <activity android:name=".StarterApplication" />
         <activity android:name=".MainActivity">
             <intent-filter>

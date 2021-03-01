@@ -119,7 +119,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         if(ParseUser.getCurrentUser() != null){
             showUserList();
-            Toast.makeText(MainActivity.this, ParseUser.getCurrentUser().getUsername()+" Logged In", Toast.LENGTH_SHORT).show();
+            Toast.makeText(MainActivity.this, ParseUser.getCurrentUser().getUsername()+" Already Logged In", Toast.LENGTH_SHORT).show();
         }
 
         // Check if logged in ?
