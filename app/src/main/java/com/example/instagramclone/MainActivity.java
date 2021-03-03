@@ -15,9 +15,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.parse.GetCallback;
 import com.parse.LogInCallback;
 import com.parse.ParseAnalytics;
 import com.parse.ParseException;
+import com.parse.ParseSession;
 import com.parse.ParseUser;
 import com.parse.SignUpCallback;
 
@@ -26,7 +28,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     EditText usernameET;
     EditText passwordET;
     TextView signUpTextView;
-    boolean signUpMode = false;
+    boolean signUpMode = false,counter=true;
 
     public void showUserList(){
         Intent intent = new Intent(getApplicationContext(),UserListActivity.class);
@@ -53,7 +55,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     public void LoginClicked(View view){
-
+        counter=false;
         if(usernameET.getText().toString().matches("") || passwordET.getText().toString().matches("")){
             Toast.makeText(MainActivity.this,"Invalid Username or Password", Toast.LENGTH_SHORT).show();
         } else {
@@ -117,9 +119,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
              }
          });
 
-        if(ParseUser.getCurrentUser() != null){
-            showUserList();
-            Toast.makeText(MainActivity.this, ParseUser.getCurrentUser().getUsername()+" Logged In", Toast.LENGTH_SHORT).show();
+        if(ParseUser.getCurrentUser() != null && counter){
+
+            ParseSession.getCurrentSessionInBackground(new GetCallback<ParseSession>() {
+                @Override
+                public void done(ParseSession object, ParseException e) {
+                    if(e!=null){
+                        Log.i("Exception", e.getMessage());
+                        Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(MainActivity.this, ParseUser.getCurrentUser().getUsername()+" already Logged In", Toast.LENGTH_SHORT).show();
+                        showUserList();
+                    }
+                }
+            });
         }
 
         // Check if logged in ?

@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">InstagramClone</string>
+
+    <string name="back4app_server_url">https://parseapi.back4app.com/</string>
+
+    <!-- Change the following strings as required -->
+    <string name="back4app_app_id">IzkoPC4kdRoEvevL6Eyh3qqnUREB9tBvoebfgzAO</string>
+    <string name="back4app_client_key">cOfGIfQt63Nba2ei4VRBH7ammFUUwIQiuNQmKq8H</string>
+
 </resources>

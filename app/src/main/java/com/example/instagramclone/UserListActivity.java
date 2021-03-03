@@ -18,6 +18,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -45,94 +47,112 @@ public class UserListActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_list);
 
+        setTitle(ParseUser.getCurrentUser().getUsername()+"'s Feed");
+
         getSupportActionBar().show();
         ListView listView = (ListView) findViewById(R.id.listView);
-        ArrayList<String> username = new ArrayList<String>();
+        ArrayList<String> usernames = new ArrayList<String>();
         imageView = (ImageView) findViewById(R.id.imageView);
 
-        ArrayAdapter adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, username);
-        listView.setAdapter(adapter);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Intent intent = new Intent(getApplicationContext(),UserFeedActivity.class);
+                intent.putExtra("username",usernames.get(position));
+                startActivity(intent);
+            }
+        });
+
+        ArrayAdapter adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, usernames);
 
         ParseQuery<ParseUser> query = ParseUser.getQuery();
         //query.whereNotEqualTo("username",ParseUser.getCurrentUser().getUsername());
+
         query.addAscendingOrder("username");
 
         query.findInBackground(new FindCallback<ParseUser>() {
             @Override
             public void done(List<ParseUser> objects, ParseException e) {
-                if(e == null && objects.size() > 0){
-                    for(ParseUser user : objects){
-                        username.add(user.getUsername());
+                if (e == null && objects.size() > 0) {
+                    for (ParseUser user : objects) {
+                        usernames.add(user.getUsername());
                     }
                     adapter.notifyDataSetChanged();
                 } else {
                     assert e != null;
                     e.printStackTrace();
+                    Toast.makeText(UserListActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
                 }
             }
         });
+
+        listView.setAdapter(adapter);
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.share_menu,menu);
+        inflater.inflate(R.menu.share_menu, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if(item.getItemId() == R.id.share){
-            if ( checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED)
-                requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},1);
+        if (item.getItemId() == R.id.share) {
+            if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED)
+                requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
             else
                 getPhoto();
-        }
-        return super.onOptionsItemSelected(item);
+        } else if(item.getItemId() == R.id.logout){
+            Toast.makeText(getApplicationContext(),ParseUser.getCurrentUser().getUsername()+" Logged Out", Toast.LENGTH_SHORT).show();
+            ParseUser.logOut();
+            Intent intent = new Intent(getApplicationContext(),MainActivity.class);
+            startActivity(intent);
+        }return super.onOptionsItemSelected(item);
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if(requestCode == 1 && grantResults.length > 0 && grantResults[0] ==  PackageManager.PERMISSION_GRANTED)
+        if (requestCode == 1 && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
             getPhoto();
     }
 
     public void getPhoto() {
         Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        startActivityForResult(intent,1);
+        startActivityForResult(intent, 1);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if(requestCode == 1 && resultCode == RESULT_OK && data != null){
+        if (requestCode == 1 && resultCode == RESULT_OK && data != null) {
             try {
                 Uri uriImage = data.getData();
-                Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(),uriImage);
+                Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), uriImage);
                 imageView.setImageBitmap(bitmap);
 
                 ByteArrayOutputStream stream = new ByteArrayOutputStream();
 
-                bitmap.compress(Bitmap.CompressFormat.PNG,100,stream);
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
 
                 byte[] byteArray = stream.toByteArray();
 
-                ParseFile file = new ParseFile("image.png",byteArray);
+                ParseFile file = new ParseFile("image.png", byteArray);
 
                 ParseObject object = new ParseObject("Images");
 
-                object.put("images",file);
-                object.put("username",ParseUser.getCurrentUser().getUsername());
+                object.put("images", file);
+                object.put("username", ParseUser.getCurrentUser().getUsername());
                 object.saveInBackground(new SaveCallback() {
                     @Override
                     public void done(ParseException e) {
-                        if(e==null)
-                            Toast.makeText(UserListActivity.this,"Image is Uploaded :-)",Toast.LENGTH_SHORT).show();
+                        if (e == null)
+                            Toast.makeText(UserListActivity.this, "Image is Uploaded :-)", Toast.LENGTH_SHORT).show();
                         else
-                            Toast.makeText(UserListActivity.this,"Image is not Uploaded :-(",Toast.LENGTH_SHORT).show();
+                            Toast.makeText(UserListActivity.this, "Image is not Uploaded :-(", Toast.LENGTH_SHORT).show();
                     }
                 });
             } catch (Exception e) {
